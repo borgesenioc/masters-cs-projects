@@ -1,5 +1,3 @@
 pulp
 networkx
 matplotlib
-pylablib
-rand
