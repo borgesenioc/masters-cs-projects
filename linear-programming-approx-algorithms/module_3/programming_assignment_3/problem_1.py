@@ -114,8 +114,8 @@ Note These problems are meant for you to develop your own thinking/problem solvi
 MaxCutGreedy(G = (V, E)):
 
 # divide the initial partition arbitrarily
-S1 are the initial n/2 of V
-S2 are the remaining n/2 of V
+S1 are the initial n/2 vertices of V
+S2 are the remaining n/2 vertices of V
 
 # evaluate if each node of each set dividion is imbalanced
 while there exists an imbalanced vertex v in V:
@@ -131,18 +131,10 @@ Now let's implement the greedy algorithm to find a cut of the graph with no imba
 The graph will be given as an adjacency list representation.
 
 Vertex set will be  {0,…,𝑛−1}
-  where  𝑛
-  (the number of vertices) is a input parameter.
-adj_list is an adjacency list which is given as a list of sts. For instance adj_list[i] for a vertex  𝑖
-  is a set to all vertices connected to vertex  𝑖
- .
-Note that since the graph is undirected, if  𝑗
-  lies in adj_list[i], we know that  𝑖
-  will be in adjacency_list[j].
-You can assume that the graph has no self loops or multiple edges between same pairs of nodes.
-We will specify a cut as a list of  𝑛
-  boolean values [b0, b1,...bn-1] wherein bi is True if  𝑖∈𝑆1
- , and False if vertex  𝑖∈𝑆2
+  where  𝑛 (the number of vertices) is a input parameter.
+adj_list is an adjacency list which is given as a list of sets. For instance adj_list[i] for a vertex  𝑖 is a set to all vertices connected to vertex  𝑖.
+Note that since the graph is undirected, if  𝑗 lies in adj_list[i], we know that  𝑖 will be in adj_list[j].
+You can assume that the graph has no self loops or multiple edges between same pairs of nodes. We will specify a cut as a list of  𝑛 boolean values [b0, b1,...bn-1] wherein bi is True if  𝑖∈𝑆1, and False if vertex  𝑖 ∈ 𝑆2
  .
 Implement the overall function find_balanced_cut that takes a graph as input and returns a list of Booleans specifying the final cut obtained by running the greedy algorithm. Please pay attention to efficiency, we will be running some large graphs through your code and it should run within a few seconds on graphs with thousands of nodes.
 '''
@@ -167,7 +159,29 @@ def find_balanced_cut(n, adj_list):
     ## imbalanced_vertices, maintain an array with the number of edges for each node that are cut and so on.
     ## Note: your algorithm must return a cut where all nodes are balanced.
     # your code here
-    raise NotImplementedError
+
+    # look for a vertex that has more edges inside its own partition than crossing the cut. return its index, or None if every vertex is balanced
+    def find_imbalanced_vertex():
+        for v in range(n):
+            internal = 0
+            crossing = 0
+            for u in adj_list[v]:
+                if cut[u] == cut[v]:
+                    internal += 1
+                else:
+                    crossing += 1
+            if internal > crossing:
+                return v
+        return None
+
+    # while there exists an imbalanced vertex v in V
+    v = find_imbalanced_vertex()
+    while v is not None:
+        # flip v to the opposite partition
+        cut[v] = not cut[v]
+        v = find_imbalanced_vertex()
+
+    return cut
 
 #These  are useful functions for the test cases
 # IMPORTANT: 
