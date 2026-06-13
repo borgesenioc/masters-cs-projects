@@ -5,15 +5,10 @@ from random import *
 '''
 
 P1: Max-Cut Problem
-We will guide you through the design of a factor-2 approximation algorithm for the Max-Cut problem. You are given an undirected graph 𝐺
- with 𝑛
- vertices and 𝑚
- edges.
+We will guide you through the design of a factor-2 approximation algorithm for the Max-Cut problem. You are given an undirected graph 𝐺 with 𝑛 vertices and 𝑚 edges.
 
-The maxcut problem asks you to partition the vertices into two subsets 𝑆+
- and 𝑆−
- such that the total number of edges crossing the cut is as large as possible.
-𝗆𝖺𝗑 ||{(𝑖,𝑗)∈𝐸 | 𝑖∈𝑆+, 𝑗∈𝑆−, 𝑆+∩𝑆−=∅,𝑆+∪𝑆−=𝑉}||
+The maxcut problem asks you to partition the vertices into two subsets 𝑆+ and 𝑆− such that the total number of edges crossing the cut is as large as possible.
+𝗆𝖺𝗑 ||{(𝑖,𝑗)∈𝐸 | 𝑖∈𝑆+, 𝑗∈𝑆−, 𝑆+∩𝑆−=∅, 𝑆+∪𝑆−=𝑉}||
 
 Example
 Consider the graph below:
@@ -51,24 +46,14 @@ draw_graph(5, edges, node_set_flag)
 
 
 '''
-We would like to partition the set  {1,…,5}
-  into two subsets  𝑆1,𝑆2
-  so that the number of edges going from a vertex in  𝑆1
-  to a vertex in  𝑆2
-  is as large as possible.
+We would like to partition the set {1,…,5} into two subsets 𝑆1, 𝑆2 so that the number of edges going from a vertex in 𝑆1 to a vertex in 𝑆2 is as large as possible.
 
 First Cut
-Suppose we set  𝑆1={1,2,3}
-  and therefore,  𝑆2={4,5}
- , we have a cut with  4
-  edges crossing it.
+Suppose we set 𝑆1={1,2,3} and therefore 𝑆2={4,5}, we have a cut with 4 edges crossing it.
 '''
 '''
 Second Cut
-We can do better by setting  𝑆1={1,2,5}
-  and  𝑆2={3,4}
-  with  6
-  edges crossing the cut.
+We can do better by setting 𝑆1={1,2,5} and 𝑆2={3,4} with 6 edges crossing the cut.
 
 '''
 
@@ -85,21 +70,12 @@ Therefore, the MAXCUT problem asks you to find a cut with as many edges as possi
 MAXCUT is known to be NP-complete though we will not ask you to prove it here. The goal of this problem is to design a greedy algorithm and prove an approximation guarantee.
 
 Greedy Algorithm
-Suppose you have a graph  𝐺
-  and we propose a partition of the vertices  𝑆1,𝑆2
- . We say that a node  𝑣
-  is imbalanced if it has strictly more number of edges to other nodes within its partition than edges crossing the cut.
+Suppose you have a graph 𝐺 and we propose a partition of the vertices 𝑆1, 𝑆2. We say that a node 𝑣 is imbalanced if it has strictly more number of edges to other nodes within its partition than edges crossing the cut.
 
 Examples
-As an example, consider the graphs shown above and the first cut we showed above with  𝑆1={1,2,3}
-  and  𝑆2={4,5}
- . Notice that vertices  2
-  and  3
-  are imbalanced.
+As an example, consider the graphs shown above and the first cut we showed above with 𝑆1={1,2,3} and 𝑆2={4,5}. Notice that vertices 2 and 3 are imbalanced.
 
-However, if we consider the second cut of the graph above, we have  𝑆1={1,2,5}
-  and  𝑆2={3,4}
-  we see that all nodes are balanced in this cut.
+However, if we consider the second cut of the graph above, we have 𝑆1={1,2,5} and 𝑆2={3,4}, and we see that all nodes are balanced in this cut.
 
 P1: Design a Greedy Algorithm
 Design a greedy algorithm that starts from an arbitrary (random?) initial partition, detects if there are imbalanced vertices and uses that information to find a partition with a better cut. Your algorithm should yield a partition with no imabalanced nodes in the final result.
@@ -130,12 +106,10 @@ Now let's implement the greedy algorithm to find a cut of the graph with no imba
 
 The graph will be given as an adjacency list representation.
 
-Vertex set will be  {0,…,𝑛−1}
-  where  𝑛 (the number of vertices) is a input parameter.
-adj_list is an adjacency list which is given as a list of sets. For instance adj_list[i] for a vertex  𝑖 is a set to all vertices connected to vertex  𝑖.
-Note that since the graph is undirected, if  𝑗 lies in adj_list[i], we know that  𝑖 will be in adj_list[j].
-You can assume that the graph has no self loops or multiple edges between same pairs of nodes. We will specify a cut as a list of  𝑛 boolean values [b0, b1,...bn-1] wherein bi is True if  𝑖∈𝑆1, and False if vertex  𝑖 ∈ 𝑆2
- .
+Vertex set will be {0,…,𝑛−1} where 𝑛 (the number of vertices) is an input parameter.
+adj_list is an adjacency list which is given as a list of sets. For instance adj_list[i] for a vertex 𝑖 is a set of all vertices connected to vertex 𝑖.
+Note that since the graph is undirected, if 𝑗 lies in adj_list[i], we know that 𝑖 will be in adj_list[j].
+You can assume that the graph has no self loops or multiple edges between same pairs of nodes. We will specify a cut as a list of 𝑛 boolean values [b0, b1,...bn-1] wherein bi is True if 𝑖∈𝑆1, and False if vertex 𝑖∈𝑆2.
 Implement the overall function find_balanced_cut that takes a graph as input and returns a list of Booleans specifying the final cut obtained by running the greedy algorithm. Please pay attention to efficiency, we will be running some large graphs through your code and it should run within a few seconds on graphs with thousands of nodes.
 '''
 
@@ -203,6 +177,28 @@ def test_cut(n, adj_list, cut):
         if 2 * num_edges_crossing_cut[i] < len(neighbors):
             assert False, f'Test Failed: In your cut, vertex {i} has {len(neighbors)} edges incident on it but only {num_edges_crossing_cut[i]} edges cross the cut'
     return 
+
+'''
+Q3. Approximation Guarantee
+Suppose we have a graph  𝐺
+  and a partition  𝑆1,𝑆2
+  of its vertices such that there are no imbalanced vertices. Show that at least half the edges in the graph must connect a node from  𝑆1
+  to one in  𝑆2
+ .
+
+Therefore, show that the greedy algorithm is a factor-2 approximation algorithm: I.e, if OPT is the optimal cut and  𝐶
+  is that of the greedy algorithm, we have:
+
+12OPT≤𝐶≤𝑂𝑃𝑇
+'''
+
+''' 
+# My answer
+Greedy = 2 Optimal because each edge can be flipped only once to be correct.
+Optimal = no flips, everything is already correct.
+Greedy max = each v is flipped once, from T to F = 2 Optimal
+C <= 2 Optimal
+'''
 
 
 
