@@ -1,3 +1,7 @@
 pulp
 networkx
 matplotlib
+numpy
+qiskit
+qiskit-aer
+pylatexenc
