@@ -2,35 +2,29 @@ from bgpLikeSim import Router, Route
 
 rtr = Router()
 
-# Manually add routes to the RIB
-rtr.rib["10.0.0.0/24"] = [
-    Route("1.1.1.1", "10.0.0.0", 24, [1, 2, 3]),
-    Route("2.2.2.2", "10.0.0.0", 24, [4, 5]),
-]
-rtr.rib["10.0.0.0/22"] = [
-    Route("3.3.3.3", "10.0.0.0", 22, [6, 7, 8, 9]),
-]
-
-print("=== Before withdraw ===")
+# Test adding new routes
+print("=== Adding routes ===")
+rtr.update(Route("1.1.1.1", "10.0.0.0", 24, [1, 2, 3]))
+rtr.update(Route("2.2.2.2", "10.0.0.0", 24, [4, 5]))
+rtr.update(Route("3.3.3.3", "10.0.0.0", 22, [6, 7, 8, 9]))
 rtr.printRIB()
 
-# Withdraw one route
-print("\n--- Withdrawing route from 1.1.1.1 ---")
-rtr.withdraw(Route("1.1.1.1", "10.0.0.0", 24, [99, 99]))
-
-print("\n=== After withdraw (should still have 2.2.2.2/24 and 3.3.3.3/22) ===")
+# Test updating an existing neighbor's route
+print("\n=== Updating 1.1.1.1's route (should replace) ===")
+rtr.update(Route("1.1.1.1", "10.0.0.0", 24, [10, 20, 30]))
 rtr.printRIB()
 
-# Withdraw the last route for /24
-print("\n--- Withdrawing route from 2.2.2.2 ---")
-rtr.withdraw(Route("2.2.2.2", "10.0.0.0", 24, [99, 99]))
-
-print("\n=== After second withdraw (should have no /24, only 3.3.3.3/22) ===")
+# Test withdrawing
+print("\n=== Withdrawing 1.1.1.1 ===")
+rtr.withdraw(Route("1.1.1.1", "10.0.0.0", 24, [99]))
 rtr.printRIB()
 
-# Withdraw from a prefix that doesn't exist
-print("\n--- Withdrawing from non-existent prefix ---")
+# Test withdrawing last route for prefix
+print("\n=== Withdrawing 2.2.2.2 (last /24) ===")
+rtr.withdraw(Route("2.2.2.2", "10.0.0.0", 24, [99]))
+rtr.printRIB()
+
+# Test withdrawing non-existent prefix
+print("\n=== Withdrawing non-existent ===")
 rtr.withdraw(Route("5.5.5.5", "99.99.99.99", 32, [1]))
-
-print("\n=== After bad withdraw (unchanged) ===")
 rtr.printRIB()

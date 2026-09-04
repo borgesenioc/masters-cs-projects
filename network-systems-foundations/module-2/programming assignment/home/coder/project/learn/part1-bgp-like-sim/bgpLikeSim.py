@@ -53,45 +53,58 @@ class Router:
 
 
     # TASK
-    '''
     def update(self, rt):
 
         # YOUR CODE HERE
-        for key in self.rib.keys():
-            if key == pfx_str(rt):
-                # check if route matches
-                for route in self.rib[pfx]:
-                    if route.prefix == rt.prefix:
-                        rib[route.prefix+"/"+route.prefix_len] = [Route("1.1.1.1", route.prefix, 24, [1,2,3])   
-            else:
-                rib[route.prefix+"/"+route.prefix_len] = [Route("1.1.1.1", route.prefix, 24, [1,2,3]) 
-                    #issue 1: we need to identify the route number as 1.1.1.1 or so and place it correctly
-                    #issue 2: we need to place the route correctly inside the list of that prefix key
-
-    '''
-    # TASK
-    def withdraw(self, rt):
+        # extract the key from the route advertisement
         key = rt.pfx_str()
 
-        # prefix not in RIB, nothing to do
+        # if prefix not in rib, just append the new prefix to the dictionary
+        if (key in self.rib) == False:
+            # and assign the advertised route into that prefix
+            self.rib[key] = [rt]
+        else:
+            # first check for existing route in that prefix
+            prefix_found = False
+
+            # traverse the routes in the prefix
+            for route in range(len(self.rib[key])):
+                # matching neighbors indicate we got the route already
+                if self.rib[key][route].neighbor == rt.neighbor:
+                    # idempotent update
+                    self.rib[key][route] = rt
+                    prefix_found = True
+                    break
+            
+            if prefix_found == False:
+                # if no existing route, add it
+                self.rib[key].append(rt)
+
+    # TASK    
+    def withdraw(self, rt):
+
+        # extract the key from the route advertisement
+        key = rt.pfx_str()
+
+        # if prefix not in rib, exit early
         if (key in self.rib) == False:
             return
 
-        # build list of routes that don't match the withdrawing neighbor
-        routes = self.rib[key]
+        # traverse existing routes and 
+        # extract all routes to a new list, except one
+        current_routes = self.rib[key]
         new_routes = []
-        for route in routes:
+
+        for route in current_routes:
+            # only the one to be withdrawn will be skipped
             if route.neighbor != rt.neighbor:
                 new_routes.append(route)
 
-        # if no routes left, remove the prefix entirely
+        # if no routes left, remove the prefix
         if len(new_routes) == 0:
             del self.rib[key]
         else:
-            self.rib[key] = new_routes
-
-        
-        
+            self.rib[key] = new_routes  
     
     def convertToBinaryString(self, ip):
         vals = ip.split(".")
