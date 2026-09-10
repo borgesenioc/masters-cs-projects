@@ -71,7 +71,7 @@ class Router:
             for route in range(len(self.rib[key])):
                 # matching neighbors indicate we got the route already
                 if self.rib[key][route].neighbor == rt.neighbor:
-                    # idempotent update
+                    # idempotent update just in case
                     self.rib[key][route] = rt
                     prefix_found = True
                     break
@@ -121,13 +121,44 @@ class Router:
     # then find shortest path of routes for that prefix
     def next_hop(self, ipaddr):
         retval = None
+        # problem: given an ip address, we neeed to a route neighbor. The route must have the longest matching prefix and shortest path
+        # challenges: 
+            # - IP addresses may not match at all
+            # - Matching IP addresses with the long prefix are selected
+            # - A selected prefix may have routes with the same path lenght
 
         # YOUR CODE HERE
+        # initate a null store for the longest prefix and list of elements for the shortest path
+        longest_prefix_len = None
+        best_pfx_key = None
+        shortest_route = None
+
+        # need it as a string to be comparable
+        ip_bin = self.convertToBinaryString(ipaddr)
+
+        # If there's a matching prefix, select the longest prefix
+        for pfx in self.rib.keys():
+            for route in self.rib[pfx]:
+                pfx_bin = self.convertToBinaryString(route.prefix)
+                if ip_bin[:route.prefix_len] == pfx_bin[:route.prefix_len]:
+                    if longest_prefix_len is None or route.prefix_len > longest_prefix_len:
+                        longest_prefix_len = route.prefix_len
+                        best_pfx_key = pfx
+
+        if longest_prefix_len == None:
+            # if no matching prefix, do nothing
+            return
+
+        # traverse the routes inside the prefix and find the shortest path
+        for route in self.rib[best_pfx_key]:
+            if shortest_route is None or len(route.path) < len(shortest_route.path):
+                shortest_route = route
+            
+        # find the neighbor of our best route, if it exists
+        retval = shortest_route.neighbor if shortest_route else None
         
-
+        # return the value of the route
         return retval
-
-
 
 
 def test_cases():
@@ -139,8 +170,6 @@ def test_cases():
 
     print("RIB")
     rtr.printRIB()
-
-    '''
 
     #Test updates work - same prefix, two neighbors
     rtr.update (Route("1.1.1.1", "10.0.0.0", 24, [3,4,5]))
@@ -208,7 +237,7 @@ def test_cases():
     rtr.withdraw(Route("1.1.1.1", "20.0.12.0", 24, [44,55,66,77,88]))
     nh = rtr.next_hop("20.0.12.0")
     assert nh == "2.2.2.2"
-    '''
+
 
 
 
