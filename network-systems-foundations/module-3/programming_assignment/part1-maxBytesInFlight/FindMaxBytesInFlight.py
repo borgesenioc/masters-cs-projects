@@ -77,6 +77,28 @@ def findMaxBytesInFlight(pcapfile):
    maxBytesInFlight = 0 
 
    # YOUR CODE HERE
+   pcap = list(rdpcap(pcapfile))
+   flow = readHandShake(pcap)
+
+   flow.highestSeqNum = fow.startSeqNum
+   flow.pktLenOfHighestSeqNumPacket = 1
+
+   for p in pcap:
+      if isFlowEgress(p, flow):
+         payload_len = get_payload_len(p)
+         if payload_len > 0 and p[TCP].seq > flow.highestSeqNum:
+            flow.highestSeqNum = p[TCP].seq
+            flow.pktLenOfHighestSeqNumPacket = payload_len
+      else:
+         if p[TCP].flags & 0x10:
+            if p[TCP].ack > flow.ackNumReceived:
+               flow.ackNumReceived = p[TCP].ack
+      
+      nextSeq = flow.highestSeqNum + flow.pktLenOfHighestSeqNumPacket
+      maxAck = flow.ackNumReceived
+      bytesInFlight = nextSeq - maxAck
+      if bytesInFlight > maxBytesInFlight:
+         maxBytesInFlight = bytesInFlight
 
    return maxBytesInFlight
 
@@ -84,12 +106,28 @@ def get_payload_len(p):
    payload_len = 0 
 
    # YOUR CODE HERE
+   payload_len = len(p[TCP].payload)
+  
 
    return payload_len
+
+pcap = rdpcap("simple-tcp-session.pcap")
+
+
+# # print(get_payload_len(pcap[5]))
+
+print(pcap[3].summary)
+'''
+for p in pcap:
+   # if p.seq == 1000:
+      print(p, p[TCP].seq, p.summary, p.len)
+
+
 
 if __name__ == '__main__':
    # check for the expected payload lengths for a couple different packets
    pcap = rdpcap("simple-tcp-session.pcap")
+
    assert get_payload_len(pcap[3]) == 5
 
    pcap = rdpcap("out_10m_0p.pcap")
@@ -104,3 +142,5 @@ if __name__ == '__main__':
    maxBytesInFlight = findMaxBytesInFlight("out_10m_0p.pcap")
    print("Max: " + str(maxBytesInFlight))
    print()
+
+   '''
