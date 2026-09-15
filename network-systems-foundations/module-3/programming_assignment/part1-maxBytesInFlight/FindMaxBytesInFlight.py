@@ -80,7 +80,7 @@ def findMaxBytesInFlight(pcapfile):
    pcap = list(rdpcap(pcapfile))
    flow = readHandShake(pcap)
 
-   flow.highestSeqNum = fow.startSeqNum
+   flow.highestSeqNum = flow.startSeqNum
    flow.pktLenOfHighestSeqNumPacket = 1
 
    for p in pcap:
@@ -111,19 +111,6 @@ def get_payload_len(p):
 
    return payload_len
 
-pcap = rdpcap("simple-tcp-session.pcap")
-
-
-# # print(get_payload_len(pcap[5]))
-
-print(pcap[3].summary)
-'''
-for p in pcap:
-   # if p.seq == 1000:
-      print(p, p[TCP].seq, p.summary, p.len)
-
-
-
 if __name__ == '__main__':
    # check for the expected payload lengths for a couple different packets
    pcap = rdpcap("simple-tcp-session.pcap")
@@ -143,4 +130,4 @@ if __name__ == '__main__':
    print("Max: " + str(maxBytesInFlight))
    print()
 
-   '''
+   
