@@ -62,11 +62,16 @@ def make_call(msg):
 def recv_message(conn):
    # conn is the client_socket (returned from socket.socket() or socket.accept()) 
    # Read in 8 bytes.  The header is packed as two 4 byte integers (use struct.unpack("ii", header))
+   conn_header = struct.unpack("ii", conn.recv(8))
    #  The two ints are the version and the data length
    #  Read in dataLen bytes.  Use the decode() function to decode the received bytes.
    #  The string will be a json string
+   json_string = conn.recv(conn_header[1]).decode()
    #  return a json dictionary (use json.loads(json_string))
-   return None # Replace this line
+   resulting_dict = json.loads(json_string)
+
+   ## return json.loads(json_string)
+   return resulting_dict
 
 
 def send_message(conn, json_dict):
@@ -84,18 +89,36 @@ def send_message(conn, json_dict):
 # see client_do_single_call for connecting to the program
 def server_program():
     # get the hostname (we're running client and server on same machine)
-    # host = socket.gethostname()
-    # port = 4444  
+    host = socket.gethostname()
+    port = 4444  
+
     # Open a socket, on the above port, and listen for multiple connections (5 is reasonable)
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # Be sure to set the SO_REUSEADDR socket option so the port can be re-used (prior to binding the socket)  
-    #   server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    # When connected, receive a message (with recv_message(conn))
-    # pass the received message to make_call(json_dict)
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    # Bind host address and port
+    server_socket.bind((host, port))
+
+    # Reasonable 5 connections
+    server_socket.listen(5)
+
     # Then send back a message with either of the following using send_message(conn, json_dict):
-       # {"status": "ERROR"}
-       # {"status":"OK", "response":retval}
-    # Then close that connection, and continue listening for more connections
-    return None
+    while True:
+        # Gotta accept new connections
+        conn, address = server_socket.accept()
+        try:
+            # When connected, receive a message (with recv_message(conn))
+            msg = recv_message(conn)
+            # pass the received message to make_call(json_dict)
+            response = make_call(msg)
+            # response with either OK or
+            send_message(conn, {"status": "OK", "response": response})
+        except Exception:
+            # Error
+            send_message(conn, {"status": "ERROR"})
+        finally:
+            # Then close that connection, and continue listening for more connections
+            conn.close()
 
 
 def client_do_single_call(call):
